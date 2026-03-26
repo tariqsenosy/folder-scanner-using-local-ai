@@ -4,6 +4,7 @@ from configparser import ConfigParser
 import filter
 import sender
 import scanner
+from analysis import analyze_message
 
 def load_config():
     config_path = 'config/settings.ini'
@@ -40,8 +41,12 @@ def main():
                     filtered_lines = filter.filter_lines(lines, keywords)
 
                     if filtered_lines:
-                        message = '\n'.join(filtered_lines)
-                        sender.send_message(message, whatsapp_info['api_token'], whatsapp_info['from_number'], whatsapp_info['to_number'])
+                        for line in filtered_lines:
+                            # Analyze the message
+                            root_cause = analyze_message(line)
+
+                            # Send the analyzed root cause via WhatsApp
+                            sender.send_message(f"Root Cause: {root_cause}", whatsapp_info['api_token'], whatsapp_info['from_number'], whatsapp_info['to_number'])
                     
             time.sleep(900)  # Wait for 15 minutes (60 * 15 seconds)
     except KeyboardInterrupt:
